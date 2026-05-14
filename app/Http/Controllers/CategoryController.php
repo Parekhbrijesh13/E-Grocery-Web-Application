@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
@@ -34,6 +35,32 @@ class CategoryController extends Controller
         session()->flash('success', 'Category created successfully!');
         return response()->json(["status"=>"success","message"=> "Category created successfully!"]);
 
+    }
+
+    public function update(CategoryRequest $request, $id){
+        $category = Category::findOrFail($id);
+        $validatedData = $request->validated();
+
+        $data = [
+            "category_name"=> $validatedData["category_name"],
+            "slug"=> $validatedData["slug"],
+            "emoji"=> $validatedData["emoji"] ?? null,
+            "description"=> $validatedData["description"] ?? null,
+            "status"=> $validatedData["status"],
+        ];
+
+        if ($request->hasFile('category_img')) {
+            if ($category->category_img && Storage::disk('public')->exists($category->category_img)) {
+                Storage::disk('public')->delete($category->category_img);
+            }
+
+            $data["category_img"] = $request->file('category_img')->store('Category_imgs','public');
+        }
+
+        $category->update($data);
+
+        session()->flash('success', 'Category updated successfully!');
+        return response()->json(["status"=>"success","message"=> "Category updated successfully!"]);
     }
 
     public function delete($id){

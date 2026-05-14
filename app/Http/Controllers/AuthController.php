@@ -9,10 +9,40 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     public function login(){
+        if (auth()->check()) {
+            return redirect()->route('admin.dashboard');
+        }
         return view('Auth.login');
     }
 
+    public function authenticate(Request $request){
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (auth()->attempt($credentials, $request->remember)) {
+            $request->session()->regenerate();
+            return response()->json(['status' => true, 'message' => 'Login successful!']);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'The provided credentials do not match our records.',
+        ], 422);
+    }
+
+    public function logout(Request $request){
+        auth()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login');
+    }
+
     public function register(){
+        if (auth()->check()) {
+            return redirect()->route('admin.dashboard');
+        }
         return view('Auth.register');
     }
 
@@ -21,17 +51,9 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|confirmed',
-        ],[
-            'name.required' => 'The name field is required.',
-            'email.required' => 'The email field is required.',
-            'email.email' => 'Please enter a valid email address.',
-            'email.unique' => 'This email is already in use.',
-            'password.required' => 'The password field is required.',
-            'password.min' => 'The password must be at least 8 characters long.',
-            'password.confirmed' => 'The password confirmation does not match.',
         ]);
 
-        $users = User::create([
+        User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),

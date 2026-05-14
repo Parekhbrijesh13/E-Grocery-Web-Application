@@ -1,77 +1,63 @@
 @extends('Admin.layouts.master')
-@section('title', 'Offers')
+@section('title', 'Banners')
 
 @section('content')
 
     <div class="page-header">
         <div>
-            <h1>Offers</h1>
-            <p>Manage special offers and promotional deals.</p>
+            <h1>Banners</h1>
+            <p>Manage promotional banners for your homepage sliders.</p>
         </div>
     </div>
 
     <div class="grid" style="grid-template-columns:1fr 380px;gap:20px;">
 
-        <!-- Offer List -->
+        <!-- Banner List -->
         <div class="card">
             <div class="card-header">
-                <span class="card-title">All Offers ({{ $offers->count() }})</span>
+                <span class="card-title">All Banners ({{ $banners->count() }})</span>
             </div>
             <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
                             <th>Image</th>
-                            <th>Title & Description</th>
-                            <th>Discount</th>
-                            <th>Validity</th>
+                            <th>Title</th>
+                            <th>Position</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($offers as $offer)
+                        @foreach ($banners as $banner)
                             <tr>
                                 <td>
-                                    @if($offer->image)
-                                        <img src="{{ asset('storage/' . $offer->image) }}" alt="Offer" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">
+                                    @if($banner->image)
+                                        <img src="{{ asset('storage/' . $banner->image) }}" alt="Banner" style="width:100px;height:40px;object-fit:cover;border-radius:6px;">
                                     @else
-                                        <div style="width:60px;height:60px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--muted);">
-                                            <i class="fa-solid fa-image"></i>
-                                        </div>
+                                        <span class="text-muted">No Image</span>
                                     @endif
                                 </td>
-                                <td>
-                                    <div style="font-weight:600;">{{ $offer->title }}</div>
-                                    <div style="font-size:12px;color:var(--muted);">{{ Str::limit($offer->description, 30) }}</div>
-                                </td>
-                                <td style="font-weight:700;color:var(--accent);">
-                                    {{ $offer->discount_percent ? $offer->discount_percent . '%' : 'N/A' }}
-                                </td>
-                                <td style="font-size:12px;color:var(--text);">
-                                    {{ $offer->start_date ?? 'Anytime' }}<br>
-                                    <span style="color:var(--muted);">to</span> {{ $offer->end_date ?? 'No expiry' }}
-                                </td>
+                                <td style="font-weight:600;">{{ $banner->title }}</td>
+                                <td><span style="font-size:12px;color:var(--muted);font-family:monospace;">{{ $banner->position }}</span></td>
                                 <td><span
-                                        class="badge {{ $offer->status ? 'badge-green' : 'badge-gray' }}">{{ $offer->status ? 'Active' : 'Inactive' }}</span>
+                                        class="badge {{ $banner->status ? 'badge-green' : 'badge-gray' }}">{{ $banner->status ? 'Active' : 'Inactive' }}</span>
                                 </td>
                                 <td>
                                     <div style="display:flex;gap:6px;">
-                                        <button type="button" class="btn btn-outline btn-sm edit-offer-btn" data-bs-toggle="modal"
-                                            data-bs-target="#editOfferModal"
-                                            data-id="{{ $offer->id }}"
-                                            data-update-url="{{ route('admin.offers.update', $offer->id) }}"
-                                            data-title="{{ $offer->title }}"
-                                            data-description="{{ $offer->description }}"
-                                            data-discount_percent="{{ $offer->discount_percent }}"
-                                            data-start_date="{{ $offer->start_date }}"
-                                            data-end_date="{{ $offer->end_date }}"
-                                            data-status="{{ $offer->status ? 1 : 0 }}"
-                                            data-image-url="{{ $offer->image ? asset('storage/' . $offer->image) : '' }}">
+                                        <button type="button" class="btn btn-outline btn-sm edit-banner-btn" data-bs-toggle="modal"
+                                            data-bs-target="#editBannerModal"
+                                            data-id="{{ $banner->id }}"
+                                            data-update-url="{{ route('admin.banners.update', $banner->id) }}"
+                                            data-title="{{ $banner->title }}"
+                                            data-position="{{ $banner->position }}"
+                                            data-link="{{ $banner->link }}"
+                                            data-status="{{ $banner->status ? 1 : 0 }}"
+                                            data-image-url="{{ $banner->image ? asset('storage/' . $banner->image) : '' }}">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
 
-                                        <form action="{{ route('admin.offers.delete', $offer->id) }}" method="POST"
+                                        <form action="{{ route('admin.banners.delete', $banner->id) }}" method="POST"
                                             class="delete-form">
                                             @csrf
                                             @method('DELETE')
@@ -88,31 +74,33 @@
             </div>
         </div>
 
-        <!-- Add Offer Form -->
+        <!-- Add Banner Form -->
         <div class="card" style="align-self:start;">
-            <div class="card-header"><span class="card-title">Add New Offer</span></div>
+            <div class="card-header"><span class="card-title">Add New Banner</span></div>
 
-            <form enctype="multipart/form-data" id="offer-form">
+            <form enctype="multipart/form-data" id="banner-form">
                 @csrf
 
                 <div class="form-group">
-                    <label class="form-label">Offer Title *</label>
-                    <input type="text" name="title" class="form-control" placeholder="e.g. Mega Fruit Sale">
+                    <label class="form-label">Banner Title *</label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. Summer Sale 2026">
                     <span class="text-danger">{{ $errors->first('title') }}</span>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <textarea name="description" class="form-control" rows="2" placeholder="Short details about the offer"></textarea>
+                    <label class="form-label">Link (Optional)</label>
+                    <input type="text" name="link" class="form-control" placeholder="e.g. /offers/summer">
+                    <span class="text-danger">{{ $errors->first('link') }}</span>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Discount Percent (%)</label>
-                    <input type="number" step="0.01" name="discount_percent" class="form-control" placeholder="15.00">
+                    <label class="form-label">Position</label>
+                    <input type="text" name="position" class="form-control" value="main_slider">
+                    <span class="text-danger">{{ $errors->first('position') }}</span>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Offer Image</label>
+                    <label class="form-label">Banner Image</label>
 
                     <label
                         style="border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;display:block;">
@@ -125,17 +113,6 @@
                     <span class="text-danger">{{ $errors->first('image') }}</span>
                 </div>
 
-                <div class="row">
-                    <div class="col-sm-6 form-group">
-                        <label class="form-label">Start Date</label>
-                        <input type="date" name="start_date" class="form-control">
-                    </div>
-                    <div class="col-sm-6 form-group">
-                        <label class="form-label">End Date</label>
-                        <input type="date" name="end_date" class="form-control">
-                    </div>
-                </div>
-
                 <div class="form-group">
                     <label class="form-label">Status</label>
                     <select name="status" class="form-control">
@@ -145,22 +122,22 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width:100%;">
-                    Create Offer
+                    Create Banner
                 </button>
             </form>
         </div>
 
-        <!-- Edit Offer Modal -->
-        <div class="modal fade" id="editOfferModal" tabindex="-1">
+        <!-- Edit Banner Modal -->
+        <div class="modal fade" id="editBannerModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="background: var(--surface); border: 1px solid var(--border);">
 
                     <div class="modal-header" style="border-bottom: 1px solid rgba(48, 54, 61, .5);">
-                        <h5 class="modal-title" style="font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;">Edit Offer</h5>
+                        <h5 class="modal-title" style="font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;">Edit Banner</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
-                    <form id="edit-offer-form" enctype="multipart/form-data">
+                    <form id="edit-banner-form" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -169,30 +146,21 @@
 
                             <div class="row">
                                 <div class="col-sm-6 form-group mb-3">
-                                    <label class="form-label">Offer Title *</label>
+                                    <label class="form-label">Banner Title *</label>
                                     <input type="text" name="title" id="edit_title" class="form-control">
                                 </div>
 
                                 <div class="col-sm-6 form-group mb-3">
-                                    <label class="form-label">Discount Percent (%)</label>
-                                    <input type="number" step="0.01" name="discount_percent" id="edit_discount_percent" class="form-control">
-                                </div>
-
-                                <div class="col-sm-12 form-group mb-3">
-                                    <label class="form-label">Description</label>
-                                    <textarea name="description" id="edit_description" class="form-control" rows="2"></textarea>
+                                    <label class="form-label">Link</label>
+                                    <input type="text" name="link" id="edit_link" class="form-control">
                                 </div>
 
                                 <div class="col-sm-6 form-group mb-3">
-                                    <label class="form-label">Start Date</label>
-                                    <input type="date" name="start_date" id="edit_start_date" class="form-control">
-                                </div>
-                                <div class="col-sm-6 form-group mb-3">
-                                    <label class="form-label">End Date</label>
-                                    <input type="date" name="end_date" id="edit_end_date" class="form-control">
+                                    <label class="form-label">Position</label>
+                                    <input type="text" name="position" id="edit_position" class="form-control">
                                 </div>
 
-                                <div class="col-sm-12 form-group mb-3">
+                                <div class="col-sm-6 form-group mb-3">
                                     <label class="form-label">Status</label>
                                     <select name="status" id="edit_status" class="form-control">
                                         <option value="1">Active</option>
@@ -201,7 +169,7 @@
                                 </div>
 
                                 <div class="col-sm-12 form-group mb-0">
-                                    <label class="form-label">Offer Image (optional)</label>
+                                    <label class="form-label">Banner Image (optional)</label>
                                     <input type="file" name="image" id="edit_image" class="form-control" style="font-size: 12px; padding: 6px 10px;">
                                     <img id="edit_preview" src="" width="100%" style="margin-top:10px; display:none; border-radius:6px; border:1px solid var(--border);">
                                 </div>
@@ -248,17 +216,17 @@
             });
 
             // Submit Add Form
-            $('#offer-form').submit(function(e) {
+            $('#banner-form').submit(function(e) {
                 e.preventDefault();
                 let formData = new FormData(this);
                 $.ajax({
-                    url: "{{ route('admin.offers.store') }}",
+                    url: "{{ route('admin.banners.store') }}",
                     type: "POST",
                     data: formData,
                     contentType: false,
                     processData: false,
                     success: function() {
-                        alert('Offer created successfully!');
+                        alert('Banner created successfully!');
                         location.reload();
                     },
                     error: function(xhr) {
@@ -273,15 +241,13 @@
             });
 
             // Open Edit Modal
-            $(document).on('click', '.edit-offer-btn', function() {
+            $(document).on('click', '.edit-banner-btn', function() {
                 let button = $(this);
-                $('#edit-offer-form').attr('action', button.attr('data-update-url'));
+                $('#edit-banner-form').attr('action', button.attr('data-update-url'));
                 $('#edit_id').val(button.attr('data-id'));
                 $('#edit_title').val(button.attr('data-title'));
-                $('#edit_description').val(button.attr('data-description'));
-                $('#edit_discount_percent').val(button.attr('data-discount_percent'));
-                $('#edit_start_date').val(button.attr('data-start_date'));
-                $('#edit_end_date').val(button.attr('data-end_date'));
+                $('#edit_link').val(button.attr('data-link'));
+                $('#edit_position').val(button.attr('data-position'));
                 $('#edit_status').val(button.attr('data-status'));
                 $('#edit_image').val('');
 
@@ -294,7 +260,7 @@
             });
 
             // Submit Edit Form
-            $('#edit-offer-form').submit(function(e) {
+            $('#edit-banner-form').submit(function(e) {
                 e.preventDefault();
                 let formData = new FormData(this);
                 formData.append('_method', 'PUT');
@@ -305,7 +271,7 @@
                     contentType: false,
                     processData: false,
                     success: function() {
-                        alert('Offer updated successfully!');
+                        alert('Banner updated successfully!');
                         location.reload();
                     },
                     error: function(xhr) {
@@ -322,7 +288,7 @@
             // Delete
             $(document).on('submit', '.delete-form', function(e) {
                 e.preventDefault();
-                if (!confirm("Are you sure you want to delete this offer?")) return false;
+                if (!confirm("Are you sure you want to delete this banner?")) return false;
                 
                 $.ajax({
                     url: $(this).attr('action'),
@@ -331,7 +297,7 @@
                     contentType: false,
                     processData: false,
                     success: function() {
-                        alert('Offer deleted successfully!');
+                        alert('Banner deleted successfully!');
                         location.reload();
                     },
                     error: function() { alert('Something went wrong!'); }

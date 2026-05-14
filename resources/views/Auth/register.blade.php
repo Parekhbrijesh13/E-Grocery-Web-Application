@@ -428,7 +428,7 @@
                 </form>
 
                 <div class="footer-note">
-                    Already have an account? <a href="{{ route('Auth.login') }}">Sign in</a>
+                    Already have an account? <a href="{{ route('login') }}">Sign in</a>
                 </div>
                 <div class="terms">
                     By registering, you agree to our <a href="#">Terms of Service</a> and <a
@@ -465,7 +465,7 @@
                     data: formdata,
 
                     success: function(response) {
-                        window.location.href = "{{ route('Auth.login') }}";
+                        window.location.href = "{{ route('login') }}";
                     },
 
                     error: function(xhr) {

@@ -106,7 +106,7 @@
                     ['fa-phone','📞 +91 98765 43210'],
                     ['fa-location-dot','📍 12 Rose Apt, Race Course Rd, Rajkot 360001'],
                     ['fa-cart-shopping','14 total orders'],
-                ]) as $info)
+                ] as $info)
                 <div style="font-size:12.5px;color:var(--muted);">{{ $info[1] }}</div>
                 @endforeach
             </div>

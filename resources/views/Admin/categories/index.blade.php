@@ -43,8 +43,16 @@
                                 </td>
                                 <td>
                                     <div style="display:flex;gap:6px;">
-                                        <button class="btn btn-outline btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#editCategoryModal">
+                                        <button type="button" class="btn btn-outline btn-sm edit-category-btn" data-bs-toggle="modal"
+                                            data-bs-target="#editCategoryModal"
+                                            data-id="{{ $cat->id }}"
+                                            data-update-url="{{ route('admin.categories.update', $cat->id) }}"
+                                            data-category-name="{{ $cat->category_name }}"
+                                            data-slug="{{ $cat->slug }}"
+                                            data-emoji="{{ $cat->emoji }}"
+                                            data-description="{{ $cat->description }}"
+                                            data-status="{{ $cat->status ? 1 : 0 }}"
+                                            data-image-url="{{ $cat->category_img ? asset('storage/' . $cat->category_img) : '' }}">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
 
@@ -128,7 +136,7 @@
         </div>
 
 
-        <!-- Add Category Form -->
+        <!-- Edit Category Form -->
 
         <div class="modal fade" id="editCategoryModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
@@ -151,6 +159,7 @@
                                 <div class="col-sm-6 form-group mb-3">
                                     <label class="form-label">Category Name *</label>
                                     <input type="text" name="category_name" id="edit_category_name" class="form-control">
+                                    <span class="text-danger">{{ $errors->first('category_name') }}</span>
                                 </div>
 
                                 <div class="col-sm-6 form-group mb-3">
@@ -271,7 +280,76 @@
                 }
             });
 
+            $(document).on('click', '.edit-category-btn', function() {
+                let button = $(this);
+                let imageUrl = button.attr('data-image-url');
 
+                $('#edit-category-form').attr('action', button.attr('data-update-url'));
+                $('#edit_id').val(button.attr('data-id'));
+                $('#edit_category_name').val(button.attr('data-category-name'));
+                $('#edit_slug').val(button.attr('data-slug'));
+                $('#edit_emoji').val(button.attr('data-emoji'));
+                $('#edit_description').val(button.attr('data-description'));
+                $('#edit_status').val(button.attr('data-status'));
+                $('#edit_category_img').val('');
+
+                if (imageUrl) {
+                    $('#edit_preview').attr('src', imageUrl).show();
+                } else {
+                    $('#edit_preview').attr('src', '').hide();
+                }
+            });
+
+            $('#edit_category_img').change(function(e) {
+                if (!this.files || !this.files[0]) {
+                    return;
+                }
+
+                let reader = new FileReader();
+
+                reader.onload = function(e) {
+                    $('#edit_preview')
+                        .attr('src', e.target.result)
+                        .show();
+                };
+
+                reader.readAsDataURL(this.files[0]);
+            });
+
+            $('#edit-category-form').submit(function(e) {
+                e.preventDefault();
+
+                let formData = new FormData(this);
+                let actionUrl = $(this).attr('action');
+
+                $.ajax({
+                    url: actionUrl,
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+
+                    success: function(response) {
+                        alert('Category updated successfully!');
+                        location.reload();
+                    },
+
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON.errors;
+                            let msg = '';
+
+                            for (let field in errors) {
+                                msg += errors[field][0] + "\n";
+                            }
+
+                            alert(msg);
+                        } else {
+                            alert('Something went wrong!');
+                        }
+                    }
+                });
+            });
 
             $(document).on('submit', '.delete-form', function(e) {
                 e.preventDefault();

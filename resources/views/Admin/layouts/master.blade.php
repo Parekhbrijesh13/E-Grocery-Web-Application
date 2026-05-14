@@ -624,41 +624,44 @@
                 <i class="fa-solid fa-bag-shopping"></i> Orders
                 <span class="nav-badge">12</span>
             </a>
-            <a href="" class="nav-item {{ request()->routeIs('admin.customers*') ? 'active' : '' }}">
+            <a href="{{ route('admin.customers.index') }}" class="nav-item {{ request()->routeIs('admin.customers*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users"></i> Customers
             </a>
         </div>
 
         <div class="sidebar-section">
             <div class="sidebar-label">Catalogue</div>
-            <a href="" class="nav-item {{ request()->routeIs('admin.products*') ? 'active' : '' }}">
+            <a href="{{ route('admin.products.index') }}"
+                class="nav-item {{ request()->routeIs('admin.products*') ? 'active' : '' }}">
                 <i class="fa-solid fa-box"></i> Products
             </a>
-            <a href="" class="nav-item {{ request()->routeIs('admin.categories*') ? 'active' : '' }}">
+            <a href="{{ route('admin.categories.index') }}"
+                class="nav-item {{ request()->routeIs('admin.categories*') ? 'active' : '' }}">
                 <i class="fa-solid fa-tags"></i> Categories
             </a>
-            <a href="" class="nav-item {{ request()->routeIs('admin.inventory*') ? 'active' : '' }}">
+            <a href="{{ route('admin.inventory.index') }}"
+                class="nav-item {{ request()->routeIs('admin.inventory*') ? 'active' : '' }}">
                 <i class="fa-solid fa-warehouse"></i> Inventory
             </a>
         </div>
 
         <div class="sidebar-section">
             <div class="sidebar-label">Marketing</div>
-            <a href="" class="nav-item {{ request()->routeIs('admin.offers*') ? 'active' : '' }}">
+            <a href="{{ route('admin.offers.index') }}" class="nav-item {{ request()->routeIs('admin.offers*') ? 'active' : '' }}">
                 <i class="fa-solid fa-percent"></i> Offers
                 <span class="nav-badge green">3</span>
             </a>
-            <a href="" class="nav-item {{ request()->routeIs('admin.coupons*') ? 'active' : '' }}">
+            <a href="{{ route('admin.coupons.index') }}" class="nav-item {{ request()->routeIs('admin.coupons*') ? 'active' : '' }}">
                 <i class="fa-solid fa-ticket"></i> Coupons
             </a>
-            <a href="" class="nav-item {{ request()->routeIs('admin.banners*') ? 'active' : '' }}">
+            <a href="{{ route('admin.banners.index') }}" class="nav-item {{ request()->routeIs('admin.banners*') ? 'active' : '' }}">
                 <i class="fa-solid fa-image"></i> Banners
             </a>
         </div>
 
         <div class="sidebar-section">
             <div class="sidebar-label">Settings</div>
-            <a href="}" class="nav-item {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
+            <a href="{{ route('admin.settings.index') }}" class="nav-item {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
                 <i class="fa-solid fa-gear"></i> Settings
             </a>
             <a href="" class="nav-item {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
@@ -668,14 +671,23 @@
 
         <div class="sidebar-footer">
             <div class="admin-card">
-                <div class="admin-avatar">A</div>
-                <div>
-                    <div class="admin-name">Admin User</div>
-                    <div class="admin-role">Super Admin</div>
-                </div>
-                <a href="" style="margin-left:auto;color:var(--muted);font-size:14px;" title="Logout">
-                    <i class="fa-solid fa-right-from-bracket"></i>
+                <a href="{{ route('admin.profile.index') }}" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; flex:1;">
+                    @if(Auth::check() && Auth::user()?->avatar)
+                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" class="admin-avatar" style="object-fit:cover;">
+                    @else
+                        <div class="admin-avatar">{{ Auth::check() && Auth::user() ? strtoupper(substr(Auth::user()->name, 0, 1)) : 'A' }}</div>
+                    @endif
+                    <div>
+                        <div class="admin-name">{{ Auth::check() && Auth::user() ? Auth::user()->name : 'Admin User' }}</div>
+                        <div class="admin-role">Super Admin</div>
+                    </div>
                 </a>
+                <form action="{{ route('logout') }}" method="POST" style="margin-left:auto; display:flex;">
+                    @csrf
+                    <button type="submit" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;" title="Logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
             </div>
         </div>
     </aside>

@@ -123,7 +123,7 @@
         <div class="card">
             <div class="card-header">
                 <span class="card-title">⚠️ Low Stock Alert</span>
-                <a href="" class="btn btn-outline btn-sm">Inventory</a>
+                <a href="{{ route('admin.inventory.index') }}" class="btn btn-outline btn-sm">Inventory</a>
             </div>
             <div class="table-wrap">
                 <table>
@@ -141,7 +141,7 @@
                                 <td style="font-weight:500;">{{ $item[0] }}</td>
                                 <td><span class="badge badge-gray">{{ $item[1] }}</span></td>
                                 <td><span class="badge badge-red">{{ $item[2] }} left</span></td>
-                                <td><button class="btn btn-warn btn-sm">Restock</button></td>
+                                <td><a href="{{ route('admin.inventory.index', ['stock_status' => 'low_stock']) }}" class="btn btn-warn btn-sm">Restock</a></td>
                             </tr>
                         @endforeach
                     </tbody>

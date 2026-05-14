@@ -3,94 +3,156 @@
 
 @section('content')
 
-<div class="page-header">
-    <div>
-        <h1>Products</h1>
-        <p>Manage your product catalogue.</p>
+    <div class="page-header">
+        <div>
+            <h1>Products</h1>
+            <p>Manage your product catalogue.</p>
+        </div>
+        <a href="{{ route('admin.products.create') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Product</a>
     </div>
-    <a href="" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Product</a>
-</div>
 
-<!-- Filters -->
-<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
-    <input type="text" class="form-control" style="width:240px;" placeholder="Search products…">
-    <select class="form-control" style="width:180px;">
-        <option>All Categories</option>
-        <option>Fruits & Vegetables</option>
-        <option>Dairy & Eggs</option>
-        <option>Grains & Pulses</option>
-        <option>Snacks</option>
-    </select>
-    <select class="form-control" style="width:150px;">
-        <option>All Status</option>
-        <option>Active</option>
-        <option>Out of Stock</option>
-        <option>Draft</option>
-    </select>
-    <div style="margin-left:auto;display:flex;gap:8px;">
-        <button class="btn btn-outline btn-sm" title="Grid View"><i class="fa-solid fa-grip"></i></button>
-        <button class="btn btn-primary btn-sm" title="List View"><i class="fa-solid fa-list"></i></button>
-    </div>
-</div>
+    <form method="GET" action="{{ route('admin.products.index') }}"
+        style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+        <input type="text" name="search" value="{{ request('search') }}" class="form-control" style="width:240px;"
+            placeholder="Search products...">
 
-<div class="card">
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th><input type="checkbox"></th>
-                    <th>Product</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Sales</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach([
-                    ['🥭','Alphonso Mangoes 1kg','Fruits & Vegetables','₹ 120','48 kg','234','Active','badge-green'],
-                    ['🥛','Amul Full Cream Milk 1L','Dairy & Eggs','₹ 65','200 L','891','Active','badge-green'],
-                    ['🍅','Tomatoes 1kg','Fruits & Vegetables','₹ 55','92 kg','412','Active','badge-green'],
-                    ['🌾','Toor Dal 1kg','Grains & Pulses','₹ 130','2 kg','128','Low Stock','badge-orange'],
-                    ['🧄','Garlic 250g','Fruits & Vegetables','₹ 40','0','56','Out of Stock','badge-red'],
-                    ['🥚','Farm Eggs (6 pcs)','Dairy & Eggs','₹ 72','140 pcs','302','Active','badge-green'],
-                    ['🧴','Dove Shampoo 200ml','Personal Care','₹ 185','38 pcs','74','Active','badge-green'],
-                    ['🍪','Parle-G Biscuits 800g','Snacks','₹ 45','250 pcs','612','Active','badge-green'],
-                ] as $p)
-                <tr>
-                    <td><input type="checkbox"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <span style="font-size:24px;">{{ $p[0] }}</span>
-                            <div style="font-weight:500;">{{ $p[1] }}</div>
-                        </div>
-                    </td>
-                    <td><span class="badge badge-gray">{{ $p[2] }}</span></td>
-                    <td style="font-weight:700;">{{ $p[3] }}</td>
-                    <td style="{{ $p[4]==='0'?'color:var(--danger);font-weight:600;':'' }}">{{ $p[4] }}</td>
-                    <td style="color:var(--muted);">{{ $p[5] }}</td>
-                    <td><span class="badge {{ $p[7] }}">{{ $p[6] }}</span></td>
-                    <td>
-                        <div style="display:flex;gap:6px;">
-                            <button class="btn btn-outline btn-sm"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0 0;border-top:1px solid var(--border);margin-top:8px;">
-        <span style="font-size:13px;color:var(--muted);">Showing 1–8 of 460 products</span>
-        <div style="display:flex;gap:4px;">
-            @foreach(['‹','1','2','3','...','58','›'] as $p)
-            <button class="btn btn-outline btn-sm" style="{{ $p==='1'?'background:var(--accent);color:#0d1117;border-color:var(--accent);':'' }}">{{ $p }}</button>
+        <select name="category_id" class="form-control" style="width:190px;">
+            <option value="">All Categories</option>
+            @foreach ($categories as $category)
+                <option value="{{ $category->id }}" @selected((string) request('category_id') === (string) $category->id)>
+                    {{ $category->category_name }}
+                </option>
             @endforeach
+        </select>
+
+        <select name="status" class="form-control" style="width:160px;">
+            <option value="">All Status</option>
+            <option value="active" @selected(request('status') === 'active')>Active</option>
+            <option value="draft" @selected(request('status') === 'draft')>Draft</option>
+            <option value="inactive" @selected(request('status') === 'inactive')>Inactive</option>
+            <option value="low_stock" @selected(request('status') === 'low_stock')>Low Stock</option>
+            <option value="out_of_stock" @selected(request('status') === 'out_of_stock')>Out of Stock</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-filter"></i> Filter</button>
+        <a href="{{ route('admin.products.index') }}" class="btn btn-outline btn-sm">Clear</a>
+    </form>
+
+    <div class="card">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Unit</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($products as $product)
+                        @php
+                            $stockBadge = $product->stock_badge;
+                            $unitValue = rtrim(rtrim(number_format((float) $product->unit_value, 2, '.', ''), '0'), '.');
+                        @endphp
+                        <tr>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    @if ($product->product_img)
+                                        <img src="{{ asset('storage/' . $product->product_img) }}" alt="{{ $product->product_name }}"
+                                            style="width:42px;height:42px;border-radius:8px;object-fit:cover;border:1px solid var(--border);">
+                                    @else
+                                        <span
+                                            style="width:42px;height:42px;border-radius:8px;background:var(--surface2);display:inline-flex;align-items:center;justify-content:center;color:var(--muted);border:1px solid var(--border);">
+                                            <i class="fa-solid fa-box-open"></i>
+                                        </span>
+                                    @endif
+                                    <div>
+                                        <div style="font-weight:600;">{{ $product->product_name }}</div>
+                                        <div style="font-size:12px;color:var(--muted);">
+                                            {{ $product->sku ?: $product->slug }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-gray">
+                                    {{ optional($product->category)->category_name ?? 'No Category' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="font-weight:700;">Rs. {{ number_format((float) $product->price, 2) }}</div>
+                                @if ((float) $product->mrp > (float) $product->price)
+                                    <div style="font-size:12px;color:var(--muted);">
+                                        <s>Rs. {{ number_format((float) $product->mrp, 2) }}</s>
+                                    </div>
+                                @endif
+                            </td>
+                            <td style="{{ $product->stock <= 0 ? 'color:var(--danger);font-weight:600;' : '' }}">
+                                {{ $product->stock }}
+                            </td>
+                            <td>{{ $unitValue }} {{ $product->unit }}</td>
+                            <td><span class="badge {{ $stockBadge['class'] }}">{{ $stockBadge['label'] }}</span></td>
+                            <td>
+                                <div style="display:flex;gap:6px;">
+                                    <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-outline btn-sm">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <form action="{{ route('admin.products.delete', $product) }}" method="POST"
+                                        onsubmit="return confirm('Delete this product?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" style="text-align:center;color:var(--muted);padding:28px;">
+                                No products found.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <div
+            style="display:flex;align-items:center;justify-content:space-between;padding:16px 0 0;border-top:1px solid var(--border);margin-top:8px;gap:12px;flex-wrap:wrap;">
+            <span style="font-size:13px;color:var(--muted);">
+                @if ($products->count())
+                    Showing {{ $products->firstItem() }}-{{ $products->lastItem() }} of {{ $products->total() }} products
+                @else
+                    Showing 0 products
+                @endif
+            </span>
+
+            @if ($products->hasPages())
+                <div style="display:flex;gap:4px;align-items:center;">
+                    @if ($products->onFirstPage())
+                        <button class="btn btn-outline btn-sm" disabled>Prev</button>
+                    @else
+                        <a href="{{ $products->previousPageUrl() }}" class="btn btn-outline btn-sm">Prev</a>
+                    @endif
+
+                    <span style="font-size:13px;color:var(--muted);padding:0 8px;">
+                        Page {{ $products->currentPage() }} of {{ $products->lastPage() }}
+                    </span>
+
+                    @if ($products->hasMorePages())
+                        <a href="{{ $products->nextPageUrl() }}" class="btn btn-outline btn-sm">Next</a>
+                    @else
+                        <button class="btn btn-outline btn-sm" disabled>Next</button>
+                    @endif
+                </div>
+            @endif
         </div>
     </div>
-</div>
 
 @endsection
